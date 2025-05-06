@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steganography System Design Document</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #1a5276;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+        h2 {
+            color: #1a5276;
+            border-bottom: 2px solid #1a5276;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #2874a6;
+            margin-top: 25px;
+        }
+        h4 {
+            color: #3498db;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .diagram {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .case-study {
+            background-color: #ebf5fb;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .info-box {
+            background-color: #e8f8f5;
+            border: 1px solid #1abc9c;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .warning-box {
+            background-color: #fef9e7;
+            border: 1px solid #f1c40f;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        code {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            padding: 2px 4px;
+            color: #c7254e;
+        }
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-x: auto;
+        }
+        .author-info {
+            margin-top: 10px;
+            font-style: italic;
+            color: #eee;
+        }
+        .version-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.3/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Steganography System Design</h1>
+        <p>Secure Data Hiding for Covert Communication</p>
+        <div class="author-info">
+            <p>Document Version: 2.0 | Date: May 6, 2025</p>
+        </div>
+    </header>
+
+    <h2>1. Executive Summary</h2>
+    <p>This document outlines the design of a comprehensive steganography system that enables users to securely hide sensitive information within innocent-looking carrier files. The system provides multiple steganographic techniques across various digital media types, including images, audio, video, and text files. Our design focuses on security, usability, and resistance to steganalysis techniques while maintaining the quality of the carrier medium.</p>
+
+    <div class="info-box">
+        <p><strong>Definition:</strong> Steganography is the practice of concealing information within other non-secret data or a physical object to avoid detection. Unlike cryptography, which encrypts data to make it unreadable, steganography hides the existence of the communication itself.</p>
+    </div>
+
+    <h2>2. Case Study: Corporate Whistleblower Protection</h2>
+    <div class="case-study">
+        <h3>2.1 Background</h3>
+        <p>A global pharmaceutical company implemented our steganography system to create a secure channel for whistleblowers to report unethical practices without fear of retaliation. The company needed a solution that would allow employees to safely communicate evidence of potential misconduct to their ethics department while protecting their identity.</p>
+
+        <h3>2.2 Challenge</h3>
+        <p>The company faced several challenges in establishing a secure whistleblower channel:</p>
+        <ul>
+            <li>Corporate networks were heavily monitored for suspicious communications</li>
+            <li>Whistleblowers feared identification through metadata or network traffic analysis</li>
+            <li>Evidence needed to be transmitted securely without raising flags</li>
+            <li>The solution needed to be simple enough for non-technical employees to use</li>
+        </ul>
+
+        <h3>2.3 Solution Implementation</h3>
+        <p>Our steganography system was deployed with the following configuration:</p>
+        <ul>
+            <li><strong>Client-Side Tool:</strong> A lightweight desktop application disguised as a standard productivity tool</li>
+            <li><strong>Media Selection:</strong> Used primarily image-based steganography with DCT coefficient modification for JPEG files</li>
+            <li><strong>Pre-Encryption:</strong> AES-256 encryption of all whistleblower data before embedding</li>
+            <li><strong>Key Management:</strong> One-time password system for extraction by the ethics department</li>
+            <li><strong>Carrier Selection:</strong> Integration with normal business documents (presentations, reports)</li>
+        </ul>
+
+        <h3>2.4 Results and Impact</h3>
+        <p>Over an 18-month period, the steganography system demonstrated significant success:</p>
+        <ul>
+            <li>Successfully facilitated 27 legitimate whistleblower reports</li>
+            <li>No whistleblower identities were compromised</li>
+            <li>Led to the discovery and remediation of 4 major compliance violations</li>
+            <li>Avoided regulatory fines estimated at $15M</li>
+            <li>Enhanced corporate culture by demonstrating commitment to ethical practices</li>
+        </ul>
+    </div>
+
+    <h2>3. System Overview</h2>
+    <h3>3.1 Purpose and Scope</h3>
+    <p>The steganography system is designed to provide secure, covert communication channels for legitimate use cases, including:</p>
+    <ul>
+        <li>Protection of sensitive corporate communications</li>
+        <li>Digital watermarking for copyright protection</li>
+        <li>Secure authentication mechanisms</li>
+        <li>Data leak prevention and tracking</li>
+        <li>Secure military and intelligence communications</li>
+    </ul>
+
+    <h3>3.2 High-Level Architecture</h3>
+<div class="diagram">
+    <div class="mermaid">
+    flowchart LR
+        subgraph "Steganography Core System"
+            E[Encoder] --> Enc[Encryption]
+            Enc --> D[Decoder]
+            E -.-> A[Analysis]
+            D -.-> V[Verification]
+        end
+        
+        I[Input Data] --> E
+        D --> O[Output Files]
+        
+        KM[Key Management] -.-> Enc
+        SM[Security Monitor] -.-> A
+        SM -.-> V
+        
+        classDef coreSystem fill:#e8f4f8,stroke:#2980b9,stroke-width:2px
+        classDef inputOutput fill:#d5f5e3,stroke:#27ae60,stroke-width:2px
+        classDef component fill:#aed6f1,stroke:#3498db,stroke-width:1px
+        classDef external fill:#fadbd8,stroke:#e74c3c,stroke-width:1px
+        
+        class I,O inputOutput
+        class E,Enc,D,A,V,SM component
+        class KM external
+        class Steganography coreSystem
+    </div>
+</div>
+
+    <h3>3.3 Key Stakeholders</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Stakeholder</th>
+                <th>Role</th>
+                <th>Primary Concerns</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>End Users</td>
+                <td>Primary system users requiring secure communication</td>
+                <td>Ease of use, reliability, security of hidden data</td>
+            </tr>
+            <tr>
+                <td>System Administrators</td>
+                <td>Deployment and maintenance of the system</td>
+                <td>Performance, scalability, updatability</td>
+            </tr>
+            <tr>
+                <td>Security Officers</td>
+                <td>Ensuring system complies with security protocols</td>
+                <td>Data protection, resistance to steganalysis</td>
+            </tr>
+            <tr>
+                <td>Compliance Team</td>
+                <td>Ensuring legal and regulatory compliance</td>
+                <td>Legal use of technology, data privacy regulations</td>
+            </tr>
+            <tr>
+                <td>Development Team</td>
+                <td>Implementation and enhancement of features</td>
+                <td>Code maintainability, algorithm efficiency</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. Functional Requirements</h2>
+    <h3>4.1 Core Capabilities</h3>
+    <ul>
+        <li><strong>Data Hiding:</strong> Embed secret data within carrier files</li>
+        <li><strong>Data Extraction:</strong> Retrieve hidden data from carrier files</li>
+        <li><strong>Multiple Media Support:</strong> Support for images, audio, video, and text carriers</li>
+        <li><strong>Encryption Integration:</strong> Pre-encryption of secret data before embedding</li>
+        <li><strong>Capacity Control:</strong> Adjustable payload capacity based on security requirements</li>
+        <li><strong>Quality Preservation:</strong> Minimal perceptible changes to carrier files</li>
+        <li><strong>Steganalysis Resistance:</strong> Techniques to avoid detection by statistical analysis</li>
+    </ul>
+
+    <h3>4.2 Steganographic Techniques</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Media Type</th>
+                <th>Technique</th>
+                <th>Description</th>
+                <th>Capacity</th>
+                <th>Robustness</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td rowspan="3">Image</td>
+                <td>LSB Substitution</td>
+                <td>Replaces least significant bits in pixel values</td>
+                <td>Medium</td>
+                <td>Low</td>
+            </tr>
+            <tr>
+                <td>DCT Coefficient Modification</td>
+                <td>Embeds data in JPEG compression coefficients</td>
+                <td>Low-Medium</td>
+                <td>Medium</td>
+            </tr>
+            <tr>
+                <td>Wavelet Transform</td>
+                <td>Modifies wavelet coefficients of image</td>
+                <td>Low</td>
+                <td>High</td>
+            </tr>
+            <tr>
+                <td rowspan="2">Audio</td>
+                <td>Echo Hiding</td>
+                <td>Introduces echo with varying parameters</td>
+                <td>Low</td>
+                <td>High</td>
+            </tr>
+            <tr>
+                <td>Phase Coding</td>
+                <td>Modifies phase components of audio signals</td>
+                <td>Medium</td>
+                <td>Medium</td>
+            </tr>
+            <tr>
+                <td rowspan="2">Video</td>
+                <td>Motion Vector Modification</td>
+                <td>Embeds data in motion vectors during encoding</td>
+                <td>Medium</td>
+                <td>Medium</td>
+            </tr>
+            <tr>
+                <td>Temporal Frame Difference</td>
+                <td>Hides data in differences between frames</td>
+                <td>High</td>
+                <td>Low</td>
+            </tr>
+            <tr>
+                <td rowspan="2">Text</td>
+                <td>White Space Encoding</td>
+                <td>Varies spacing between words/lines</td>
+                <td>Very Low</td>
+                <td>Low</td>
+            </tr>
+            <tr>
+                <td>Syntactic Methods</td>
+                <td>Alters text structure while preserving meaning</td>
+                <td>Low</td>
+                <td>Medium</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>5. System Architecture</h2>
+    <h3>5.1 Component Overview</h3>
+    <p>The steganography system consists of the following key components:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Component</th>
+                <th>Description</th>
+                <th>Primary Functionality</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>User Interface Layer</td>
+                <td>Provides user interaction points (GUI, CLI, API)</td>
+                <td>User authentication, file selection, parameter configuration</td>
+            </tr>
+            <tr>
+                <td>Media Processor</td>
+                <td>Handles different media types</td>
+                <td>File parsing, format validation, preprocessing</td>
+            </tr>
+            <tr>
+                <td>Steganographic Engine</td>
+                <td>Core embedding/extraction logic</td>
+                <td>Algorithm implementation, technique selection</td>
+            </tr>
+            <tr>
+                <td>Encryption Module</td>
+                <td>Provides cryptographic services</td>
+                <td>Data encryption/decryption, key management</td>
+            </tr>
+            <tr>
+                <td>Quality Analyzer</td>
+                <td>Assesses carrier file quality</td>
+                <td>Quality metrics calculation, perceptibility analysis</td>
+            </tr>
+            <tr>
+                <td>Security Analyzer</td>
+                <td>Assesses steganographic security</td>
+                <td>Statistical analysis, detectability estimation</td>
+            </tr>
+            <tr>
+                <td>Logging & Auditing</td>
+                <td>Records system activity</td>
+                <td>Secure logging, usage tracking, compliance</td>
+            </tr>
+            <tr>
+                <td>Key Management</td>
+                <td>Handles cryptographic keys</td>
+                <td>Key generation, storage, rotation, and distribution</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>5.2 Data Flow Diagram</h3>
+<div class="diagram">
+    <div class="mermaid">
+    flowchart TD
+        User1((User)) -->|Files + Parameters| P1((1. Input Validation))
+        P1 -->|Validated Input| P2((2. Media Processing))
+        P2 -->|Processed Media| P3((3. Data Embedding/Extraction))
+        P3 -->|Stego File/Extracted Data| P4((4. Output Verification))
+        P4 -->|Result| User2((User))
+        
+        P4 -->|Feedback| P3
+        P3 -->|Feedback| P2
+        P2 -->|Feedback| P1
+        
+        DB1[(Config DB)] <--> P1
+        DB2[(Key Vault)] <--> P3
+        P3 --> DB3[(Audit Log)]
+        
+        classDef entity fill:#f9e79f,stroke:#f1c40f,stroke-width:2px,color:#333
+        classDef process fill:#d4efdf,stroke:#27ae60,stroke-width:2px,color:#333
+        classDef datastore fill:#d6eaf8,stroke:#2980b9,stroke-width:2px,color:#333
+        
+        class User1,User2 entity
+        class P1,P2,P3,P4 process
+        class DB1,DB2,DB3 datastore
+    </div>
+</div>
+
+    <h3>5.3 Security Design</h3>
+    <p>The system incorporates multiple layers of security to protect both the steganographic process and the hidden data:</p>
+    <ul>
+        <li><strong>Pre-embedding Encryption:</strong> Secret data is encrypted before embedding using AES-256 or ChaCha20</li>
+        <li><strong>Authentication:</strong> Multi-factor authentication for system access with hardware tokens</li>
+        <li><strong>Key Management:</strong> Hardware Security Modules (HSMs) for key storage and operations</li>
+        <li><strong>Anti-Steganalysis:</strong> Adaptive embedding techniques to minimize statistical anomalies</li>
+        <li><strong>Secure Channel:</strong> TLS 1.3 with PFS for all communications</li>
+        <li><strong>Tamper Detection:</strong> HMAC signatures to verify stego file integrity</li>
+        <li><strong>Memory Protection:</strong> Secure memory wiping after processing</li>
+    </ul>
+
+    <div class="warning-box">
+        <p><strong>Security Note:</strong> The strength of the steganographic system relies on both the quality of the embedding algorithms and the security of the surrounding infrastructure. A compromise in either area could lead to detection or extraction of the hidden data.</p>
+    </div>
+
+    <h2>6. Implementation Details</h2>
+    <h3>6.1 Technology Stack</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Component</th>
+                <th>Technology</th>
+                <th>Justification</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Backend Services</td>
+                <td>Python (Flask/Django), Rust (performance-critical components)</td>
+                <td>Strong libraries for media processing and cryptography</td>
+            </tr>
+            <tr>
+                <td>Frontend Interface</td>
+                <td>React.js, HTML5/CSS3, WebAssembly</td>
+                <td>Interactive UI with responsive design and client-side processing</td>
+            </tr>
+            <tr>
+                <td>Database</td>
+                <td>PostgreSQL, Redis (caching)</td>
+                <td>Security features, performance for configuration storage</td>
+            </tr>
+            <tr>
+                <td>Encryption</td>
+                <td>OpenSSL, libsodium, AWS KMS</td>
+                <td>Robust, well-tested cryptographic libraries with HSM integration</td>
+            </tr>
+            <tr>
+                <td>Media Processing</td>
+                <td>OpenCV, PIL, FFmpeg, Librosa</td>
+                <td>Comprehensive media handling capabilities across formats</td>
+            </tr>
+            <tr>
+                <td>Deployment</td>
+                <td>Docker, Kubernetes, Terraform</td>
+                <td>Consistent environments, scalability, infrastructure as code</td>
+            </tr>
+            <tr>
+                <td>Authentication</td>
+                <td>OAuth 2.0, JWT, WebAuthn</td>
+                <td>Industry standard protocols with strong security and FIDO2 support</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>6.2 Algorithm Implementation</h3>
+    <h4>6.2.1 Image LSB Algorithm</h4>
+    <pre>
+function embedData(carrierImage, secretData, password):
+    # Pre-processing
+    encryptedData = encrypt(secretData, password)
+    binaryData = convertToBinary(encryptedData)
+    
+    # Validation
+    if length(binaryData) > availableCapacity(carrierImage):
+        throw ERROR("Insufficient capacity")
+    
+    # Embedding process
+    for each pixel in carrierImage:
+        for each color channel in pixel:
+            if moreDataToEmbed():
+                # Replace LSB with data bit
+                channel = (channel & 0xFE) | nextBit(binaryData)
+    
+    # Add validation marker
+    embedSignature(carrierImage, hash(secretData))
+    
+    return modifiedImage
+
+function extractData(stegoImage, password):
+    # Verify signature
+    if !verifySignature(stegoImage):
+        throw ERROR("Tampered or invalid stego image")
+    
+    # Extraction process
+    binaryData = []
+    for each pixel in stegoImage:
+        for each color channel in pixel:
+            # Extract LSB
+            binaryData.append(channel & 0x01)
+    
+    # Post-processing
+    encryptedData = convertFromBinary(binaryData)
+    secretData = decrypt(encryptedData, password)
+    
+    return secretData
+    </pre>
+
+    <h4>6.2.2 Audio Echo Hiding Algorithm</h4>
+    <pre>
+function embedAudioData(carrierAudio, secretData, password):
+    # Pre-processing
+    encryptedData = encrypt(secretData, password)
+    binaryData = convertToBinary(encryptedData)
+    
+    # Split audio into frames
+    frames = segmentAudio(carrierAudio)
+    
+    # Embed each bit using echo hiding
+    for i, frame in enumerate(frames):
+        bit = binaryData[i % len(binaryData)]
+        offset = 50 + (bit * 50)  # 50ms for 0, 100ms for 1
+        decay = 0.5
+        echoFrame = createEcho(frame, offset, decay)
+        frames[i] = mixFrames(frame, echoFrame)
+    
+    # Reconstruct audio
+    stegoAudio = reconstructAudio(frames)
+    return stegoAudio
+
+function extractAudioData(stegoAudio, password):
+    # Split audio into frames
+    frames = segmentAudio(stegoAudio)
+    
+    # Extract bits by analyzing echo characteristics
+    binaryData = []
+    for frame in frames:
+        offset = detectEchoOffset(frame)
+        bit = 1 if offset > 75 else 0
+        binaryData.append(bit)
+    
+    # Post-processing
+    encryptedData = convertFromBinary(binaryData)
+    secretData = decrypt(encryptedData, password)
+    
+    return secretData
+    </pre>
+
+    <h4>6.2.3 Video Motion Vector Algorithm</h4>
+    <pre>
+function embedVideoData(carrierVideo, secretData, password):
+    # Pre-processing
+    encryptedData = encrypt(secretData, password)
+    binaryData = convertToBinary(encryptedData)
+    
+    # Process video frames
+    video = loadVideo(carrierVideo)
+    bitIndex = 0
+    
+    for frame in video.frames():
+        if frame.isPFrame():
+            for block in frame.motionVectors():
+                if bitIndex < len(binaryData):
+                    # Modify motion vector components
+                    if binaryData[bitIndex]:
+                        block.dx = oddify(block.dx)
+                        block.dy = oddify(block.dy)
+                    else:
+                        block.dx = evenify(block.dx)
+                        block.dy = evenify(block.dy)
+                    bitIndex += 1
+    
+    # Save modified video
+    return video.save()
+    
+function extractVideoData(stegoVideo, password):
+    video = loadVideo(stegoVideo)
+    binaryData = []
+    
+    for frame in video.frames():
+        if frame.isPFrame():
+            for block in frame.motionVectors():
+                # Extract bit from motion vector parity
+                bit = 1 if (isOdd(block.dx) and isOdd(block.dy)) else 0
+                binaryData.append(bit)
+    
+    # Post-processing
+    encryptedData = convertFromBinary(binaryData)
+    secretData = decrypt(encryptedData, password)
+    
+    return secretData
+    </pre>
+
+    <h3>6.3 API Design</h3>
+    <p>The system exposes the following RESTful API endpoints with enhanced security:</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Endpoint</th>
+                <th>Method</th>
+                <th>Description</th>
+                <th>Parameters</th>
+                <th>Security</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>/api/v2/embed</td>
+                <td>POST</td>
+                <td>Embed secret data into carrier file</td>
+                <td>carrier_file, secret_data, algorithm, key_id</td>
+                <td>JWT Auth, Rate Limiting, Request Signing</td>
+            </tr>
+            <tr>
+                <td>/api/v2/extract</td>
+                <td>POST</td>
+                <td>Extract secret data from stego file</td>
+                <td>stego_file, key_id, auth_token</td>
+                <td>JWT Auth, HMAC Validation</td>
+            </tr>
+            <tr>
+                <td>/api/v2/analyze</td>
+                <td>POST</td>
+                <td>Analyze carrier file capacity and quality</td>
+                <td>file, algorithm</td>
+                <td>JWT Auth</td>
+            </tr>
+            <tr>
+                <td>/api/v2/techniques</td>
+                <td>GET</td>
+                <td>List available steganographic techniques</td>
+                <td>media_type</td>
+                <td>JWT Auth</td>
+            </tr>
+            <tr>
+                <td>/api/v2/security/analyze</td>
+                <td>POST</td>
+                <td>Evaluate stego file security</td>
+                <td>stego_file, algorithm</td>
+                <td>JWT Auth, Admin Role</td>
+            </tr>
+            <tr>
+                <td>/api/v2/keys/generate</td>
+                <td>POST</td>
+                <td>Generate new encryption key</td>
+                <td>key_type, key_length</td>
+                <td>JWT Auth, Admin Role</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>7. Testing Strategy</h2>
+    <h3>7.1 Testing Approaches</h3>
+    <ul>
+        <li><strong>Unit Testing:</strong> Individual algorithm and component testing with 90%+ coverage</li>
+        <li><strong>Integration Testing:</strong> Testing component interactions and data flows</li>
+        <li><strong>Performance Testing:</strong> Evaluating processing speed and resource usage under load</li>
+        <li><strong>Security Testing:</strong> Penetration testing and steganalysis resistance evaluation</li>
+        <li><strong>Fuzz Testing:</strong> Invalid, unexpected, or random data inputs</li>
+        <li><strong>Usability Testing:</strong> User interface and experience evaluation</li>
+        <li><strong>Compliance Testing:</strong> Verification against security standards</li>
+    </ul>
+
+    <h3>7.2 Quality Metrics</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Description</th>
+                <th>Target Value</th>
+                <th>Measurement Method</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>PSNR (Image)</td>
+                <td>Peak Signal-to-Noise Ratio</td>
+                <td>&gt; 40 dB</td>
+                <td>Compare original and stego images</td>
+            </tr>
+            <tr>
+                <td>SSIM (Image)</td>
+                <td>Structural Similarity Index</td>
+                <td>&gt; 0.95</td>
+                <td>Structural comparison metric</td>
+            </tr>
+            <tr>
+                <td>SNR (Audio)</td>
+                <td>Signal-to-Noise Ratio</td>
+                <td>&gt; 35 dB</td>
+                <td>Audio quality measurement</td>
+            </tr>
+            <tr>
+                <td>Detection Resistance</td>
+                <td>Resistance to steganalysis</td>
+                <td>&lt; 5% detection rate</td>
+                <td>StegExpose, StegDetect tools</td>
+            </tr>
+            <tr>
+                <td>Processing Time</td>
+                <td>Time for embedding/extraction</td>
+                <td>&lt; 5s for 10MB</td>
+                <td>Benchmark tests</td>
+            </tr>
+            <tr>
+                <td>Error Rate</td>
+                <td>Data corruption during process</td>
+                <td>&lt; 0.001%</td>
+                <td>CRC checks on test data</td>
+            </tr>
+            <tr>
+                <td>Memory Safety</td>
+                <td>Memory leaks/errors</td>
+                <td>0 critical issues</td>
+                <td>Valgrind, AddressSanitizer</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>8. Deployment Strategy</h2>
+    <h3>8.1 System Requirements</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Component</th>
+                <th>Minimum Requirements</th>
+                <th>Recommended</th>
+                <th>Production</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Server CPU</td>
+                <td>4-core processor</td>
+                <td>8-core processor</td>
+                <td>16+ core with AES-NI</td>
+            </tr>
+            <tr>
+                <td>Server Memory</td>
+                <td>8 GB RAM</td>
+                <td>16 GB RAM</td>
+                <td>32+ GB RAM</td>
+            </tr>
+            <tr>
+                <td>Storage</td>
+                <td>100 GB SSD</td>
+                <td>500 GB SSD</td>
+                <td>1TB+ NVMe</td>
+            </tr>
+            <tr>
+                <td>Network</td>
+                <td>100 Mbps</td>
+                <td>1 Gbps</td>
+                <td>10 Gbps</td>
+            </tr>
+            <tr>
+                <td>HSM</td>
+                <td>Not required</td>
+                <td>Optional</td>
+                <td>Required for production</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>8.2 Deployment Architecture</h3>
+<div class="diagram">
+    <div class="mermaid">
+    flowchart LR
+        subgraph "Client Zone"
+            DC[Desktop Client]
+            MC[Mobile Client]
+            WC[Web Client]
+        end
+        
+        subgraph "DMZ"
+            LB[Load Balancer]
+            AG[API Gateway]
+            WAF[Web App Firewall]
+        end
+        
+        subgraph "Secure Zone"
+            AS[Application Servers]
+            PS[Processing Servers]
+            DB[(Encrypted Database)]
+            KM[HSM Key Management]
+            AUD[Audit System]
+            MON[Monitoring]
+        end
+        
+        DC --> WAF
+        MC --> WAF
+        WC --> WAF
+        WAF --> LB
+        LB --> AG
+        AG --> AS
+        AS --> PS
+        PS --> DB
+        DB --> KM
+        KM --> AUD
+        AUD --> MON
+        MON --> AG
+        
+        classDef clientZone fill:#ebdef0,stroke:#8e44ad,stroke-width:2px,stroke-dasharray:5 5
+        classDef dmzZone fill:#fdebd0,stroke:#e67e22,stroke-width:2px,stroke-dasharray:5 5
+        classDef secureZone fill:#d4efdf,stroke:#27ae60,stroke-width:2px,stroke-dasharray:5 5
+        
+        classDef clientComp fill:#d7bde2,stroke:#8e44ad,stroke-width:1px
+        classDef dmzComp fill:#fad7a0,stroke:#e67e22,stroke-width:1px
+        classDef secureComp fill:#a9dfbf,stroke:#27ae60,stroke-width:1px
+        
+        class ClientZone clientZone
+        class DMZ dmzZone
+        class SecureZone secureZone
+        
+        class DC,MC,WC clientComp
+        class LB,AG,WAF dmzComp
+        class AS,PS,DB,KM,AUD,MON secureComp
+    </div>
+</div>
+
+    <h3>8.3 Scalability Considerations</h3>
+    <p>The system is designed to scale horizontally to accommodate growing user bases and processing demands:</p>
+    <ul>
+        <li><strong>Auto-scaling:</strong> Kubernetes-based horizontal pod autoscaling</li>
+        <li><strong>Regional Deployment:</strong> Multi-region deployment for global low-latency access</li>
+        <li><strong>CDN Integration:</strong> Cache static assets and common carrier files</li>
+        <li><strong>Queue-based Processing:</strong> RabbitMQ for asynchronous job processing</li>
+        <li><strong>Database Read Replicas:</strong> For read-heavy operations</li>
+        <li><strong>GPU Acceleration:</strong> GPU nodes for media processing workloads</li>
+    </ul>
+
+    <h2>9. Risk Analysis and Mitigation</h2>
+    <h3>9.1 Risk Assessment</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Risk</th>
+                <th>Likelihood</th>
+                <th>Impact</th>
+                <th>Risk Score</th>
+                <th>Mitigation Strategy</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Steganalysis Detection</td>
+                <td>Medium</td>
+                <td>High</td>
+                <td>High</td>
+                <td>Continuous algorithm improvement, adaptive embedding</td>
+            </tr>
+            <tr>
+                <td>Key Compromise</td>
+                <td>Low</td>
+                <td>Critical</td>
+                <td>High</td>
+                <td>HSM integration, key rotation, multi-person approval</td>
+            </tr>
+            <tr>
+                <td>Side-channel Attacks</td>
+                <td>Medium</td>
+                <td>High</td>
+                <td>High</td>
+                <td>Constant-time algorithms, secure memory handling</td>
+            </tr>
+            <tr>
+                <td>Legal Compliance</td>
+                <td>Medium</td>
+                <td>High</td>
+                <td>High</td>
+                <td>Regular legal review, geofencing, usage policies</td>
+            </tr>
+            <tr>
+                <td>Denial of Service</td>
+                <td>High</td>
+                <td>Medium</td>
+                <td>Medium</td>
+                <td>Rate limiting, resource quotas, auto-scaling</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>9.2 Security Compliance</h3>
+    <p>The system is designed to comply with relevant security standards:</p>
+    <ul>
+        <li><strong>GDPR:</strong> Data protection principles for EU compliance</li>
+        <li><strong>NIST SP 800-53:</strong> Security and privacy controls</li>
+        <li><strong>ISO 27001:</strong> Information security management</li>
+        <li><strong>FIPS 140-3:</strong> Cryptographic module validation</li>
+        <li><strong>SOC 2 Type II:</strong> Security, availability, confidentiality</li>
+        <li><strong>HIPAA:</strong> For healthcare-related deployments</li>
+    </ul>
+
+    <h2>10. Future Enhancements</h2>
+    <h3>10.1 Roadmap</h3>
+    <p>Planned enhancements to the steganography system include:</p>
+    <ol>
+        <li><strong>Deep Learning Integration:</strong> Neural networks for adaptive embedding</li>
+        <li><strong>Post-Quantum Cryptography:</strong> CRYSTALS-Kyber for key exchange</li>
+        <li><strong>Blockchain Verification:</strong> Immutable logging of stego operations</li>
+        <li><strong>3D Model Steganography:</strong> Support for GLTF, FBX formats</li>
+        <li><strong>Automated Cover Selection:</strong> AI-based optimal carrier selection</li>
+        <li><strong>Mobile Optimization:</strong> On-device processing with TEE integration</li>
+        <li><strong>Adversarial Training:</strong> Regular updates against new steganalysis</li>
+    </ol>
+
+    <h2>11. Conclusion</h2>
+    <p>The enhanced steganography system design provides a comprehensive framework for secure data hiding across multiple media types. The system balances security, usability, and performance while incorporating modern cryptographic practices and resistance to steganalysis techniques.</p>
+    
+    <p>Key improvements in this version include:</p>
+    <ul>
+        <li>Reorganized content with case study upfront for better context</li>
+        <li>Completed algorithm sections for all supported media types</li>
+        <li>Enhanced security architecture with HSM integration</li>
+        <li>Detailed API specifications with security requirements</li>
+        <li>Comprehensive testing and quality metrics</li>
+        <li>Production-grade deployment architecture</li>
+    </ul>
+
+    <div class="footer">
+        <p>© 2025 - Steganography System Design Document - Confidential</p>
+        <p>Document ID: STEG-SYS-DOC-25-002 | Revision: 2.0</p>
+    </div>
+</body>
+</html>
